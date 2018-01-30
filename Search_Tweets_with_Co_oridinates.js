@@ -1,0 +1,1 @@
+db.getCollection('Tweets').find({Co_oridinates:{ $exists: true }})
