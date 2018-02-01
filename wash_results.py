@@ -101,7 +101,8 @@ if __name__ == '__main__':
             dump[str(i)] = item
             i += 1
             # fanlist.append(json.dumps(dump))
-    json.dump(dump, fanfan)
+        json.dump(dump, fanfan)
+        fanfan.write('\n')
     fanfan.close()
     fol = open("newfollows", "w+")
     for foll in Follows.objects:
@@ -116,5 +117,6 @@ if __name__ == '__main__':
             dump[str(i)] = item
             i += 1
             # fanlist.append(json.dumps(dump))
-    json.dump(dump, fol)
+        json.dump(dump, fol)
+        fanfan.write('\n')
     fol.close()
