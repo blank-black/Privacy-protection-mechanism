@@ -83,13 +83,15 @@ class Tweets(Document):
 
 
 if __name__ == '__main__':
+
     connect(
         Info['database'],
         host=Info['addr'],
         port=Info['port'],
     )
+
     fanfan = open("newfans", "w+")
-    for fan in Fans.objects:
+    for fan in Fans.objects.timeout(False):
         itemList = fan.get_items()
         dump = collections.OrderedDict()
         i = 1
@@ -104,8 +106,9 @@ if __name__ == '__main__':
         json.dump(dump, fanfan)
         fanfan.write('\n')
     fanfan.close()
+
     fol = open("newfollows", "w+")
-    for foll in Follows.objects:
+    for foll in Follows.objects.timeout(False):
         itemList = foll.get_items()
         dump = collections.OrderedDict()
         i = 1
@@ -118,5 +121,5 @@ if __name__ == '__main__':
             i += 1
             # fanlist.append(json.dumps(dump))
         json.dump(dump, fol)
-        fanfan.write('\n')
+        fol.write('\n')
     fol.close()
