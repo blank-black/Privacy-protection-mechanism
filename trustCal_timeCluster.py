@@ -100,10 +100,13 @@ class UserInfo(Document):
         self.tweets_timer=[]
         for tweet in tweets:
             ''''''
-            timeObj = re.match('.*(\d{2,}):(\d{2,})',tweet.PubTime)
+            timeObj = re.match('.*?(\d{2,}):(\d{2,})',tweet.PubTime)
             hour = int(timeObj.group(1))
             minute = int(timeObj.group(2))
             self.tweets_timer.append([hour*60+minute,0])
+
+
+
         kmeans = KMeans(n_clusters=5).fit(self.tweets_timer)
         return kmeans
 
