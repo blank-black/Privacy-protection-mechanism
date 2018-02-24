@@ -222,10 +222,15 @@ if __name__ == '__main__':
 
     dg.add_nodes(follows)
     for follow in Follows.objects.timeout(False):
-        targets=follow.get_items()
-        see=follow.get_id()
-        for target in targets:
 
+        targets=follow.get_items()
+        items=list(set(targets))
+
+        see=follow.get_id()
+        for target in items:
+            if target  not in follows:
+                dg.add_node(target)
+                follows.append(target)
             dg.add_edge((see,target))
 
     pr = PRIterator(dg)
