@@ -12,7 +12,7 @@ def username():
 <html> 
 <head> 
     <meta charset="utf-8"/> 
-    <title>Flask POST方法演示</title> 
+    <title>Flask POST方法演示</title>
 </head> 
 <body> 
 {} 
@@ -37,8 +37,10 @@ def username():
             fp.write('password:'+pwd+'\n')
             fp.close()  
             if name=='admin' and pwd=='password':
-                return HTML.format('<p>Welcome {}!</p>'.format(name))
+                return HTML.format('<p>Welcome <strong>{}</strong>!</p>'.format(name))
                 # return HTML.format('<p>Your name is <strong>{}</strong></p>'.format(name))  
+            else:
+                return HTML.format('<p>Username or password error!</p>')
         else:  
             return redirect(url_for('username'))  
     
