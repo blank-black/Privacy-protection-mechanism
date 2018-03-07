@@ -1,6 +1,8 @@
+#-*- coding: UTF-8 -*-
 from mongoengine import *
-from math import log
+from math import log,floor
 from sklearn.cluster import KMeans
+import random
 import collections
 import json
 import re
@@ -8,7 +10,13 @@ Info = {'addr': '127.0.0.1',
         'port': 27017,
         'database': 'Sina'}
 
+from aip import AipNlp
 
+""" 你的 APPID AK SK """
+APP_ID = '10799517'
+API_KEY = 'xzMsCEd2ZkGwEEa8aiyRWGO8'
+SECRET_KEY = 'QtCUG2sBHSvp4LegMO7XzsEwBOhhXGBe '
+client = AipNlp(APP_ID, API_KEY, SECRET_KEY)
 
 class Tweets(Document):
     """ 微博信息 """
@@ -21,6 +29,7 @@ class Tweets(Document):
     Like = IntField()  # 点赞数
     Comment = IntField()  # 评论数
     Transfer = IntField()  # 转载数
+    SimScore = 0
     meta = {'collection': 'Tweets'}
 
     def get_id(self):
@@ -42,6 +51,8 @@ class UserInfo(Document):
     Sex_Orientation = StringField()  # 性取向
     Marriage = StringField()  # 婚姻状况
     URL = StringField()  # 首页链接
+    common_tools = []
+    common_time = 0
     meta = {'collection': 'Information'}
 
     def get_id(self):
@@ -100,15 +111,62 @@ class UserInfo(Document):
         self.tweets_timer=[]
         for tweet in tweets:
             ''''''
-            timeObj = re.match('.*?(\d{2,}):(\d{2,})',tweet.PubTime)
+            timeObj = re.match('.*(\d{2,}):(\d{2,})',tweet.PubTime)
             hour = int(timeObj.group(1))
             minute = int(timeObj.group(2))
             self.tweets_timer.append([hour*60+minute,0])
-
-
-
         kmeans = KMeans(n_clusters=5).fit(self.tweets_timer)
         return kmeans
+
+    def tweet_sim_cal(self,tweet,tweets):
+        ''''''
+        #构造随机数
+        text1 = tweet.Content.encode('GBK','ignore')
+        print('文本一:'+text1.decode('GBK'))
+        num_of_tweets = tweets.count()
+        if num_of_tweets < 5:
+            cycles = num_of_tweets
+        else:
+            cycles = 5
+        for i in range(cycles):
+            ran = floor(random.random()*100) % num_of_tweets
+            text2 = tweets[ran].Content.encode('GBK','ignore')
+            print('文本二:'+text2.decode('GBK'))
+            res = client.simnet(text1.decode('GBK'),text2.decode('GBK'))
+            print(res)
+            tweet.SimScore += res['score']
+            print('和 "{}" 的相似度为{}'.format(text2.decode('GBK'),res['score']))
+        tweet.SimScore /= cycles
+        return tweet.SimScore
+
+    def get_common_tools(self):
+        '''读取常用工具'''
+        self.common_tools = []
+        return self.common_tools
+
+    def is_common_tool(self,tool):
+        for commontool in self.common_tools:
+            if tool == commontool:
+                return True
+        return False
+
+    def is_common_time(self,time):
+        if time - self.common_time < 7200:
+            return True
+        return False
+
+    def score_of_behave(self,tweet,tweets):
+        '''计算用户微博行为得分'''
+        score_b = 0
+        zpz = tweet.Comment + tweet.Transfer + tweet.Like
+        score_b += log(zpz)*0.33
+        if self.is_common_tool(tweet.Tool):
+            score_b += 0.15
+        if self.tweet_sim_cal(tweet,tweets)<0.7:
+            score_b += 0.2
+
+        return score_b
+
 
 class Fans(DynamicDocument):
     """粉丝信息"""
@@ -166,8 +224,11 @@ if __name__ == '__main__':
         kmeans = user.tweets_timer_cluster(tweets)
         labels_ = kmeans.labels_.tolist()
         cluster_centers_ = kmeans.cluster_centers_.tolist()
-        print(kmeans.labels_)
-        print(kmeans.cluster_centers_)
-        print(user.tweets_timer)
+        #print(kmeans.labels_)
+        #print(kmeans.cluster_centers_)
+        #print(user.tweets_timer)
+        print('时间片聚类结束，开始相似度计算')
+        score = user.tweet_sim_cal(tweets[1],tweets)
+        print('整体相似度为'+str(score))
 
     Trust_value.close()
