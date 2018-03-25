@@ -63,6 +63,7 @@ class UserInfo(Document):
         #     d["Gender"] = self.Gender
         if not self.Province is None:
             d["Province"] = self.Province
+            d["Province"].encode("utf-8")
         # if not self.City is None:
         #     d["City"] = self.City
         # if not self.Signature is None:
@@ -92,6 +93,7 @@ class UserInfo(Document):
             d["Gender"] = self.Gender
         if not self.Province is None:
             d["Province"] = self.Province
+            d["Province"].encode("utf-8")
         if not self.City is None:
             d["City"] = self.City
         if not self.Signature is None:
@@ -208,6 +210,7 @@ class Tweets(Document):
         d = {
             '_id': self._id,
             'ID': self.ID,
+            'Content': self.Content,
             'PubTime': self.PubTime,
             'Like': self.Like,
             'Comment': self.Comment,
@@ -288,7 +291,7 @@ def username():
 		ret=','.join(bloc)
 		print(type(ret))
 		print(ret)
-                return ret, 200
+                return ret.decode("unicode-escape"), 200
 
     	    elif request.form['action']=='getinfo':
                 getid = request.form['getid']
@@ -299,7 +302,7 @@ def username():
         	    jsonValue=uinfo[0].to_json_ncut()
                 else:
                     jsonValue=uinfo[0].to_json_cut()
-                return json.dumps(jsonValue),200
+                return json.dumps(jsonValue).decode("unicode-escape"),200
         else:  
             return "<h1>No Request</h1>",401 
 
