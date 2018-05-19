@@ -4,7 +4,7 @@ import sys
 def fisher_cluster(data_list):
     sum_cost = sys.maxsize
     label = 0
-    for i in range(1, len(data_list) - 1):
+    for i in range(1, len(data_list)):
         d1 = 0
         d2 = 0
         avg1 = get_average(data_list[0:i])
