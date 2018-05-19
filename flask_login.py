@@ -77,7 +77,7 @@ class UserInfo(Document):
         if not self.Num_Fans is None:
             d["Num_Fans"] = self.Num_Fans
 
-        d["cut"] = '1'
+        d["cut"]='1'
         # if not self.Marriage is None:
         #     d["Marriage"] = self.Marriage
         # if not self.URL is None:
@@ -112,7 +112,7 @@ class UserInfo(Document):
             d["Marriage"] = self.Marriage
         if not self.URL is None:
             d["URL"] = self.URL
-        d["cut"] = '0'
+        d["cut"]='0'
         return d
 
     def Get_Trust_Value(self):
@@ -288,11 +288,11 @@ def username():
                 follows = Follows.objects()[:2]# 这个地方如果取的太多，会造成延迟太大的问题
                 for follow in follows:
                     tweets = Tweets.objects(ID=follow._id)[:15]
-                    for tweet in tweets:
+                    for i,tweet in enumerate(tweets):
                         if float(info[0].Trust_Value)>5:
-		    	    bloc.append(json.dumps(tweet.to_json()))
+		    	    bloc.append({i:json.dumps(tweet.to_json())})
 			else:
-			    bloc.append(json.dumps(tweet.to_json_cut()))
+			    bloc.append({i:json.dumps(tweet.to_json_cut())})
 		ret=','.join(bloc)
 		print(type(ret))
 		print(ret)
