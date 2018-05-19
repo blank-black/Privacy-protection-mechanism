@@ -76,6 +76,8 @@ class UserInfo(Document):
             d["Num_Follows"] = self.Num_Follows
         if not self.Num_Fans is None:
             d["Num_Fans"] = self.Num_Fans
+
+        d["cut"] = '1'
         # if not self.Marriage is None:
         #     d["Marriage"] = self.Marriage
         # if not self.URL is None:
@@ -110,6 +112,7 @@ class UserInfo(Document):
             d["Marriage"] = self.Marriage
         if not self.URL is None:
             d["URL"] = self.URL
+        d["cut"] = '0'
         return d
 
     def Get_Trust_Value(self):
@@ -188,6 +191,7 @@ class Tweets(Document):
             'Like': self.Like,
             'Comment': self.Comment,
             'Transfer': self.Transfer,
+            'cut':'0',
         }
         if self.Co_oridinates is not None:
             d['Co_oridinates'] = self.Co_oridinates
@@ -215,6 +219,7 @@ class Tweets(Document):
             'Like': self.Like,
             'Comment': self.Comment,
             'Transfer': self.Transfer,
+            'cut':'1',
         }
         return d
 
