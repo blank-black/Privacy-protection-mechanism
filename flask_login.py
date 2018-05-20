@@ -171,8 +171,8 @@ class Tweets(Document):
     meta = {'collection': 'Tweets'}
 
     def get_info(self):
-        UserInfo = UserInfo.objects(_id__startswith=self._id)
-        return UserInfo
+        Info = UserInfo.objects(_id__startswith=self.ID)
+        return Info
 
 
     def to_json(self):
@@ -181,7 +181,7 @@ class Tweets(Document):
         datepat3 = re.compile(u'(.*)(\u00A0|\u200B)(.*)')
         m1 = datepat1.match(self.PubTime)
         m2 = datepat2.match(self.PubTime)
-        UserInfo=self.get_info()
+        Info=self.get_info()
         if m1:
             self.PubTime="2018-1-1 "+m1.group(1)+":00 "
         if m2:
@@ -198,7 +198,7 @@ class Tweets(Document):
             'Comment': self.Comment,
             'Transfer': self.Transfer,
             'cut':'0',
-            'NickName': UserInfo.NickName,
+            'NickName': Info[0].NickName,
         }
         if self.Co_oridinates is not None:
             d['Co_oridinates'] = self.Co_oridinates
@@ -209,7 +209,7 @@ class Tweets(Document):
         datepat1 = re.compile(u'今天 (.*)')
         datepat2 = re.compile(u'(\d+)月(\d+)日(.*)')
         datepat3 = re.compile(u'(.*)(\u00A0|\u200B)(.*)')
-        UserInfo=self.get_info()
+        Info=self.get_info()
         m1 = datepat1.match(self.PubTime)
         m2 = datepat2.match(self.PubTime)
         if m1:
@@ -227,7 +227,7 @@ class Tweets(Document):
             'Like': self.Like,
             'Comment': self.Comment,
             'Transfer': self.Transfer,
-            'NickName': UserInfo.NickName,
+            'NickName': Info[0].NickName,
             'cut':'1',
         }
         return d
