@@ -254,7 +254,7 @@ def username():
     elif request.method == 'POST':  
         if request.form['username']:
             connect('Sina', host='localhost', port=27017)
-            name = request.form['username']
+            name = request.form['username']#['username']
 	    print("username:"+name+"\n")
 	    print(request.form['action'])
             if request.form['action']=='login':
@@ -292,31 +292,46 @@ def username():
                         return json.dumps(json4),200
 
             elif request.form['action']=='getbloc':
-                bloc = list()
-                info=UserInfo.objects(_id=name)
-                follows = Follows.objects()[:2]# 这个地方如果取的太多，会造成延迟太大的问题
-                for follow in follows:
-                    tweets = Tweets.objects(ID=follow._id)[:15]
-                    for i,tweet in enumerate(tweets):
-                        if float(info[0].Trust_Value)>5:
-		    	    bloc.append({i:json.dumps(tweet.to_json())})
-			else:
-			    bloc.append({i:json.dumps(tweet.to_json_cut())})
-		ret=','.join(bloc)
-		print(type(ret))
-		print(ret)
-                return ret.decode("unicode-escape"), 200
+	    	#name=request.form['getid']
+                bloc = {}
+                info=UserInfo.objects(_id=request.form['getid'])
+		print(request.form['getid'])
+                follows = Follows.objects(_id=request.form['getid'])# 这个地方如果取的太多，会造成延迟太大的问题
+                #for follow in follows:
+		    #print(follow['1'])
+		s=request.form['getid']
+		print(s)
+		tweets = Tweets.objects(ID=s)[:15]#follow['1'])[:15]
+		for i,tweet in enumerate(tweets):
+		    print(i)
+		    print(tweet.to_json())
+                    if float(info[0].Trust_Value)>5:
+		    	bloc[str(i)]=json.dumps(tweet.to_json());
+		    else:
+			bloc[str(i)]=json.dumps(tweet.to_json_cut());
+		#ret=','.join(bloc)
+		#print(type(ret))
+		#print(ret)
+		print(str(bloc).decode("unicode-escape"))
+                return str(bloc).decode("unicode-escape"), 200#ret.decode("unicode-escape"), 200
 
     	    elif request.form['action']=='getinfo':
                 getid = request.form['getid']
-    	    	info=UserInfo.objects(_id=name)
+    	    	info=UserInfo.objects(_id=request.form['username'])
         	uid = request.form['getid']
         	uinfo=UserInfo.objects(_id=getid)
-        	if float(info[0].Trust_Value)>5:
-        	    jsonValue=uinfo[0].to_json_ncut()
-                else:
-                    jsonValue=uinfo[0].to_json_cut()
-                return json.dumps(jsonValue).decode("unicode-escape"),200
+		for i in info:
+		    jsonValue={}
+        	    if float(i.Trust_Value)>5:
+		        for u in uinfo:
+			    #global jsonValue
+        		    jsonValue=u.to_json_ncut()
+                    else:
+			for u in uinfo:
+			    #global jsonValue
+                	    jsonValue=uinfo.to_json_cut()
+		    print(jsonValue)
+                    return json.dumps(jsonValue).decode("unicode-escape"),200
         else:  
             return "<h1>No Request</h1>",401 
 
