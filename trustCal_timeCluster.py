@@ -158,12 +158,9 @@ class UserInfo(Document):
     def score_of_behave(self,tweet,tweets):
         '''计算用户微博行为得分'''
         score_b = 0
-        zpz = tweet.Comment + tweet.Transfer + tweet.Like
-        score_b += log(zpz)*0.33
-        if self.is_common_tool(tweet.Tool):
-            score_b += 0.15
-        if self.tweet_sim_cal(tweet,tweets)<0.7:
-            score_b += 0.2
+        zpz = tweet.Comment*1.5 + tweet.Transfer*2 + tweet.Like +2
+        score_b += log(zpz)
+        score_b*=(1-self.tweet_sim_cal(tweet,tweets))
 
         return score_b
 
