@@ -37,6 +37,65 @@ class UserInfo(Document):
     IMEI = StringField() # 设备标识号
     Trust_Value= StringField()
     meta = {'collection': 'Information'}
+
+    def get_tweets(self):
+        tweets = Tweets.objects(_id__startswith=self._id)
+        return tweets
+
+    def if_tweets_less_than_3(self, tweets):
+        tweets_num = 0
+        for tweet in tweets:
+            tweets_num += 1
+        if tweets_num < 3:
+            return 1
+        else:
+            return 0
+
+    def tweets_timer_cluster(self, tweets):
+        self.tweets_timer = []
+
+        tweets_num=0
+
+        for tweet in tweets:
+            # timeObj = re.match('.*(\d{2,}):(\d{2,})',tweet.PubTime)
+            # hour = int(timeObj.group(1))
+            # minute = int(timeObj.group(2))
+            secs = tweet.sec()
+            self.tweets_timer.append([secs, 0])
+            tweets_num+=1
+
+
+        # print(self._id,tweets_num)            
+        kmeans = KMeans(n_clusters=3).fit(self.tweets_timer)
+
+        if DEBUG:
+            for i in range(3):
+                h=int(kmeans.cluster_centers_[i][0]//3600)
+                m=int((kmeans.cluster_centers_[i][0]-h*3600)//60)
+                s=int(kmeans.cluster_centers_[i][0]-h*3600-m*60)
+                print('第'+str(i+1)+'个聚类中心为:'+"{:0>2d}".format(h)+':'+"{:0>2d}".format(m)+':'+"{:0>2d}".format(s))
+# cluster_centers_ : array, [n_clusters, n_features]
+# Coordinates of cluster centers
+# labels_ : :
+# Labels of each point
+# inertia_ : float
+# Sum of squared distances of samples to their closest cluster center.
+        return kmeans
+
+    def tweets_timer_bias(self,tweets):
+        kmeas=self.tweets_timer_cluster(tweets)
+
+        maxbias=0
+        bias_arr=[]
+        for tweet in tweets:
+            secs=tweet.sec()
+            bias = 1/((1/abs(kmeas.cluster_centers_[0][0]-secs+0.01))+(1/abs(kmeas.cluster_centers_[1][0]-secs+0.01))+(1/abs(kmeas.cluster_centers_[2][0]-secs+0.01)))
+
+            if bias > maxbias:
+                maxbias=bias
+            bias_arr.append(bias)
+        return bias_arr
+
     def to_json(self):
         d = {
             "_id": str(self._id),
